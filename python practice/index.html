@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white flex items-center justify-center h-screen">
+  <div id="game" class="grid grid-cols-3 gap-2 w-64">
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(0)">-</div>
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(1)">-</div>
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(2)">-</div>
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(3)">-</div>
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(4)">-</div>
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(5)">-</div>
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(6)">-</div>
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(7)">-</div>
+    <div class="cell flex items-center justify-center text-4xl border border-white h-20" onclick="makeMove(8)">-</div>
+  </div>
+
+<script>
+  async function makeMove(i) {
+    const response = await fetch("/move", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ position: i })
+    });
+
+    const data = await response.json();
+    const cells = document.querySelectorAll(".cell");
+
+    // update board
+    data.board.forEach((val, idx) => {
+      cells[idx].innerText = val;
+    });
+
+    // check winner or tie
+    if (data.winner) {
+      setTimeout(() => {
+        if (data.winner === "Tie") {
+          alert("It's a tie!");
+        } else {
+          alert(data.winner + " wins!");
+        }
+      }, 10);
+    }
+  }
+</script>
+</body>
+</html>
+
+
