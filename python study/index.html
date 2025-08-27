@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin:0; }
+    #chatbox { width: 400px; background: white; border-radius: 10px; padding: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 500px; }
+    #messages { flex-grow: 1; overflow-y: auto; margin-bottom: 10px; }
+    .message { margin: 5px 0; padding: 8px 12px; border-radius: 10px; max-width: 80%; }
+    .user { background: #007bff; color: white; align-self: flex-end; }
+    .bot { background: #e5e5e5; align-self: flex-start; }
+    #input-area { display: flex; }
+    #input { flex-grow: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+    #send { margin-left: 5px; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="chatbox">
+    <div id="messages"></div>
+    <div id="input-area">
+      <input id="input" type="text" placeholder="Type a message...">
+      <button id="send">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const messages = document.getElementById("messages");
+    const input = document.getElementById("input");
+    const sendBtn = document.getElementById("send");
+
+    function addMessage(text, sender) {
+      const div = document.createElement("div");
+      div.classList.add("message", sender);
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage(text, "user");
+      input.value = "";
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text })
+      });
+
+      const data = await res.json();
+      if (data.answer) {
+        addMessage(data.answer, "bot");
+      } else {
+        const answer = prompt("I don't know that yet. Please teach me:");
+        if (answer) {
+          await fetch("/teach", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: text, answer: answer })
+          });
+          addMessage("Thanks! I've learned something new.", "bot");
+        }
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+  </script>
+</body>
+</html>
+
+
