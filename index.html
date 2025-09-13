@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jarvix AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000000;
+      color: #ffffff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 30px 20px 25px;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #1a1a1a;
+      flex-shrink: 0;
+    }
+    
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    
+    .header .subtitle {
+      font-size: 0.9rem;
+      color: #666666;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    /* Messages container */
+    .messages-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      scrollbar-width: thin;
+      scrollbar-color: #333333 transparent;
+    }
+    
+    .messages::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .messages::-webkit-scrollbar-track {
+      background: #111111;
+      border-radius: 4px;
+    }
+    
+    .messages::-webkit-scrollbar-thumb {
+      background: #333333;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    
+    .messages::-webkit-scrollbar-thumb:hover {
+      background: #444444;
+    }
+    
+    .message {
+      max-width: 80%;
+      padding: 16px 20px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      word-wrap: break-word;
+      animation: messageSlide 0.3s ease-out;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+    
+    @keyframes messageSlide {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message.ai {
+      align-self: flex-start;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      color: #e5e5e5;
+    }
+    
+    .message.user {
+      align-self: flex-end;
+      background: #2a2a2a;
+      color: #ffffff;
+      border: 1px solid #3a3a3a;
+    }
+    
+    /* Input area */
+    .input-area {
+      flex-shrink: 0;
+      padding: 20px;
+      background: #000000;
+      border-top: 1px solid #1a1a1a;
+      display: flex;
+      justify-content: center;
+    }
+    
+    .input-container {
+      width: 100%;
+      max-width: 900px;
+      position: relative;
+    }
+    
+    .input-wrapper {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 24px;
+      padding: 4px;
+      transition: all 0.2s ease;
+    }
+    
+    .input-wrapper:focus-within {
+      border-color: #444444;
+      box-shadow: 0 0 0 1px #333333;
+    }
+    
+    .input-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0a0a0a;
+      border-radius: 20px;
+      padding: 12px 18px;
+    }
+    
+    .input-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+    }
+    
+    .input-field::placeholder {
+      color: #666666;
+    }
+    
+    .send-button {
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      border-radius: 16px;
+      padding: 10px 20px;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .send-button:hover {
+      background: #3a3a3a;
+      border-color: #4a4a4a;
+    }
+    
+    .send-button:active {
+      transform: translateY(1px);
+    }
+    
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #888888;
+      font-size: 0.9rem;
+    }
+    
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background: #666666;
+      border-radius: 50%;
+      animation: typingAnimation 1.4s ease-in-out infinite;
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typingAnimation {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+      30% {
+        transform: translateY(-6px);
+        opacity: 1;
+      }
+    }
+    
+    /* Error styling */
+    .error-message {
+      color: #ef4444;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .error-title {
+      font-weight: 500;
+    }
+    
+    .error-details {
+      font-size: 0.85rem;
+      color: #999999;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2.2rem;
+      }
+      
+      .header {
+        padding: 20px 15px 18px;
+      }
+      
+      .messages {
+        padding: 15px;
+        gap: 16px;
+      }
+      
+      .message {
+        max-width: 90%;
+        padding: 14px 18px;
+        font-size: 0.9rem;
+      }
+      
+      .input-area {
+        padding: 15px;
+      }
+      
+      .input-box {
+        padding: 10px 16px;
+      }
+      
+      .send-button {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>JARVIX AI</h1>
+    <div class="subtitle">
+      <div class="status-dot"></div>
+      Incognito • Privacy First
+    </div>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="messages-container">
+    <div class="messages" id="messages">
+      <div class="message ai">
+        Welcome to JARVIX AI! I'm here to help you with anything you need. Ask me a question to get started.
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area">
+    <div class="input-container">
+      <div class="input-wrapper">
+        <div class="input-box">
+          <input 
+            type="text" 
+            class="input-field" 
+            id="prompt"
+            placeholder="Type a message..."
+            autocomplete="off"
+          />
+          <button class="send-button" onclick="sendPrompt()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+            </svg>
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+    async function sendPrompt() {
+      const inputBox = document.getElementById("prompt");
+      const messagesDiv = document.getElementById("messages");
+      const prompt = inputBox.value.trim();
+
+      if (!prompt) return;
+
+      // User message
+      const userMsg = document.createElement("div");
+      userMsg.className = "message user";
+      userMsg.textContent = prompt;
+      messagesDiv.appendChild(userMsg);
+      autoScroll(messagesDiv);
+      inputBox.value = "";
+
+      // AI thinking message
+      const aiMsg = document.createElement("div");
+      aiMsg.className = "message ai";
+      aiMsg.innerHTML = `
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <span style="margin-left: 8px;">Thinking...</span>
+        </div>
+      `;
+      messagesDiv.appendChild(aiMsg);
+      autoScroll(messagesDiv);
+
+      try {
+        const res = await fetch("http://127.0.0.1:8000/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: prompt }),
+        });
+
+        if (!res.ok) throw new Error("Network response was not ok");
+
+        const data = await res.json();
+        
+        // Replace thinking indicator with actual response
+        aiMsg.innerHTML = '';
+        aiMsg.textContent = data.response || "⚠️ No response from AI.";
+        autoScroll(messagesDiv);
+        
+      } catch (err) {
+        aiMsg.innerHTML = `
+          <div class="error-message">
+            <div class="error-title">❌ Connection Error</div>
+            <div class="error-details">Could not connect to server. Make sure your backend is running on port 8000.</div>
+          </div>
+        `;
+        console.error("Fetch error:", err);
+        autoScroll(messagesDiv);
+      }
+    }
+
+    function autoScroll(container) {
+      // Small delay to ensure content is rendered before scrolling
+      setTimeout(() => {
+        container.scrollTop = container.scrollHeight;
+      }, 50);
+    }
+
+    // Enter key functionality
+    document.getElementById("prompt").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendPrompt();
+      }
+    });
+
+    // Focus input on load
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('prompt').focus();
+    });
+  </script>
+</body>
+</html>
+
+
